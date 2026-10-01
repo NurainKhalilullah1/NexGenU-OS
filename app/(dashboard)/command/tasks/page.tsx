@@ -1,10 +1,9 @@
 // app/(dashboard)/command/tasks/page.tsx — Admin All Tasks View
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getAllTasks } from '@/lib/db/tasks'
-import { TaskCard } from '@/components/tasks/TaskCard'
+import { AllTasksTable } from '@/components/dashboard/command/AllTasksTable'
 import { TaskFilters } from '@/components/dashboard/command/TaskFilters'
 import { CreateTaskButton } from '@/components/dashboard/command/CreateTaskButton'
 import { EmptyState } from '@/components/dashboard/shared/EmptyState'
@@ -19,6 +18,7 @@ interface SearchParams {
   status?: string
   priority?: string
   search?: string
+  kpi?: string
 }
 
 export default async function AdminAllTasksPage({
@@ -39,6 +39,7 @@ export default async function AdminAllTasksPage({
     status: sp.status,
     priority: sp.priority,
     search: sp.search,
+    has_kpi_ref: sp.kpi === '1' ? true : undefined,
   })
 
   return (
@@ -65,17 +66,7 @@ export default async function AdminAllTasksPage({
           action={<CreateTaskButton />}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {tasks.map((task) => (
-            <Link
-              key={task.id}
-              href={`/command/tasks/${task.id}`}
-              style={{ textDecoration: 'none', display: 'block' }}
-            >
-              <TaskCard task={task} showPillar />
-            </Link>
-          ))}
-        </div>
+        <AllTasksTable tasks={tasks} showPillar />
       )}
     </div>
   )

@@ -15,8 +15,9 @@ import { ReviewQueueSection, type ReviewQueueSubmission } from '@/components/das
 import { CommentThread } from '@/components/tasks/CommentThread'
 import { ExtensionHistory } from '@/components/tasks/ExtensionHistory'
 import { FileDownloadButton } from '@/components/tasks/FileDownloadButton'
+import { StopRecurrenceButton } from '@/components/tasks/StopRecurrenceButton'
 import { formatDate, formatDueDate, isOverdue } from '@/lib/utils'
-import { ArrowLeft, Calendar, User, Clock, Flag, Link as LinkIcon } from 'lucide-react'
+import { ArrowLeft, Calendar, User, Clock, Flag, Link as LinkIcon, ExternalLink, Repeat } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -48,6 +49,9 @@ export default async function AdminTaskDetailPage({ params }: { params: Promise<
 
   const pendingSubmission = submissions.find((s) => s.review_status === 'pending')
 
+  const isKpiUrl = task.kpi_ref && (task.kpi_ref.startsWith('http://') || task.kpi_ref.startsWith('https://'))
+  const kpiHref = isKpiUrl ? task.kpi_ref! : task.kpi_ref ? `https://${task.kpi_ref}` : ''
+
   return (
     <div className="page-content" style={{ maxWidth: '900px' }}>
       {/* Back */}
@@ -64,9 +68,31 @@ export default async function AdminTaskDetailPage({ params }: { params: Promise<
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '10px', flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: '24px', fontWeight: 700, flex: 1, minWidth: '200px' }}>{task.title}</h1>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <StatusBadge status={task.status} isOverdue={overdue} />
             <PriorityBadge priority={task.priority} />
+            {task.recurrence && task.recurrence !== 'none' && (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: 'var(--color-accent)',
+                  background: 'rgba(185, 251, 194, 0.12)',
+                  border: '1px solid rgba(185, 251, 194, 0.3)',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                }}
+              >
+                <Repeat size={12} />
+                Recurring ({task.recurrence})
+              </span>
+            )}
+            {task.recurrence && task.recurrence !== 'none' && (
+              <StopRecurrenceButton taskId={task.id} />
+            )}
           </div>
         </div>
 
@@ -91,13 +117,74 @@ export default async function AdminTaskDetailPage({ params }: { params: Promise<
             </span>
           )}
           {task.kpi_ref && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <a
+              href={kpiHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--color-accent)', textDecoration: 'none' }}
+              className="hover:underline"
+              id="task-kpi-meta-link"
+            >
               <LinkIcon size={12} />
               {task.kpi_ref}
-            </span>
+              <ExternalLink size={10} />
+            </a>
           )}
         </div>
       </div>
+
+      {/* KPI Reference Section */}
+      {task.kpi_ref && (
+        <div
+          style={{
+            background: 'var(--surface-1)',
+            border: '1px solid var(--border-default)',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '8px',
+                background: 'rgba(185, 251, 194, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-accent)',
+              }}
+            >
+              <LinkIcon size={16} />
+            </div>
+            <div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                KPI Reference
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {task.kpi_ref}
+              </div>
+            </div>
+          </div>
+          <a
+            href={kpiHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary btn-sm"
+            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            id="task-kpi-cta-link"
+          >
+            <ExternalLink size={13} />
+            Open KPI Link
+          </a>
+        </div>
+      )}
 
       {/* Description */}
       {task.description && (

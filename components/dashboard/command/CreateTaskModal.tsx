@@ -18,6 +18,7 @@ export function CreateTaskModal({ open, onClose }: CreateTaskModalProps) {
   const [pillars, setPillars] = useState<Pillar[]>([])
   const [heads, setHeads] = useState<User[]>([])
   const [selectedPillar, setSelectedPillar] = useState('')
+  const [recurrence, setRecurrence] = useState('none')
 
   useEffect(() => {
     if (!open) return
@@ -174,12 +175,42 @@ export function CreateTaskModal({ open, onClose }: CreateTaskModalProps) {
             </div>
           </div>
 
+          {/* Recurrence row */}
+          <div>
+            <label htmlFor="task-recurrence" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: 'var(--text-secondary)' }}>
+              Recurrence
+            </label>
+            <select
+              id="task-recurrence"
+              name="recurrence"
+              className="input"
+              value={recurrence}
+              onChange={(e) => setRecurrence(e.target.value)}
+            >
+              <option value="none">None (One-off task)</option>
+              <option value="weekly">Weekly (+7 days on approval)</option>
+              <option value="monthly">Monthly (+1 month on approval)</option>
+            </select>
+            {recurrence !== 'none' && (
+              <p style={{ fontSize: '12px', color: 'var(--color-accent)', marginTop: '4px' }}>
+                Next instance auto-created on approval
+              </p>
+            )}
+          </div>
+
           {/* KPI Ref */}
           <div>
             <label htmlFor="task-kpi" style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: 'var(--text-secondary)' }}>
-              KPI Reference
+              KPI Reference <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(URL or ID)</span>
             </label>
-            <input id="task-kpi" name="kpi_ref" type="text" className="input" placeholder="e.g. KPI-2026-Q3-01" maxLength={200} />
+            <input
+              id="task-kpi"
+              name="kpi_ref"
+              type="text"
+              className="input"
+              placeholder="e.g. https://metrics.nexgenu.org/kpi/12 or KPI-2026-Q3-01"
+              maxLength={200}
+            />
           </div>
 
           {/* Error */}

@@ -66,3 +66,20 @@ This document records key architectural decisions made during development, as ma
 - **Context**: Task discussions require live updates without manual page refreshes, and users must have granular control over their email frequency.
 - **Decision**: Implemented Supabase Realtime channel subscription in `CommentThread.tsx` with optimistic local insertion. User notification preferences are persisted in `notification_settings` table and checked prior to dispatching SMTP emails.
 
+---
+
+## Decision 009: Grouped Audit Log & Single-Pillar Enforcement for Bulk Actions
+- **Date**: 2026-10-01
+- **Status**: Accepted
+- **Context**: Phase 3 Part D and Acceptance Test 4 mandate that cross-pillar bulk reassignments must be strictly prohibited, and multi-task reassignments must be logged as a single grouped entry in `audit_log`.
+- **Decision**: Implemented dual client-and-server validation in `AllTasksTable.tsx` and `bulkReassignAction`. If selected tasks span multiple distinct `pillar_id` values, the UI actively disables confirmation with an explicit warning banner, and the Server Action throws an authorization error. On execution, a single grouped `audit_log` row is emitted with `action: 'bulk_reassign'`, recording all affected `taskIds` and target assignee in JSON metadata.
+
+---
+
+## Decision 010: Recurring Task Auto-Generation on Approval Transition
+- **Date**: 2026-10-01
+- **Status**: Accepted
+- **Context**: Phase 3 Part C requires recurring tasks (`weekly` and `monthly`) to automatically spawn their subsequent instance when leadership approves the active instance.
+- **Decision**: Attached instance duplication logic directly inside `approveSubmissionAction`. Once the active task is transitioned to `approved`, the server checks `task.recurrence`. If non-null, a new task is spawned preserving title, description, pillar, assignee, priority, and KPI reference, with a freshly calculated due date (`+7 days` for weekly, `+1 month` for monthly) and status initialized to `not_started`. Admins can halt this progression via `stopTaskRecurrenceAction`.
+
+

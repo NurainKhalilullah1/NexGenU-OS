@@ -13,6 +13,7 @@ import {
   Zap,
   FileText,
   Settings,
+  BarChart3,
 } from 'lucide-react'
 import type { User } from '@/types/database'
 
@@ -49,6 +50,7 @@ export function Sidebar({ user }: SidebarProps) {
     ? [
         { href: '/command', label: 'Command Center', icon: LayoutDashboard },
         { href: '/command/tasks', label: 'All Tasks', icon: CheckSquare },
+        { href: '/command/reports', label: 'Reports', icon: BarChart3 },
         { href: '/command/review', label: 'Review Queue', icon: ClipboardList },
         { href: '/command/audit', label: 'Audit Log', icon: FileText },
         { href: '/settings/notifications', label: 'Notification Settings', icon: Settings },

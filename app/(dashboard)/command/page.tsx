@@ -1,13 +1,13 @@
-// app/(dashboard)/command/page.tsx — Command Dashboard (Admin)
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { getCommandDashboardStats, getAllTasks } from '@/lib/db/tasks'
+import { getCommandDashboardStats, getAllTasks, getPillarWorkloadStats } from '@/lib/db/tasks'
 import { getPendingSubmissions } from '@/lib/db/submissions'
 import { getPendingExtensionRequests } from '@/lib/db/extensions'
 import { SummaryCard } from '@/components/dashboard/shared/SummaryCard'
-import { TaskCard } from '@/components/tasks/TaskCard'
+import { PillarWorkloadSection } from '@/components/dashboard/command/PillarWorkloadSection'
+import { AllTasksTable } from '@/components/dashboard/command/AllTasksTable'
 import { EmptyState } from '@/components/dashboard/shared/EmptyState'
 import { CreateTaskButton } from '@/components/dashboard/command/CreateTaskButton'
 import { ReviewQueueSection } from '@/components/dashboard/command/ReviewQueueSection'
@@ -29,6 +29,7 @@ interface SearchParams {
   status?: string
   priority?: string
   search?: string
+  kpi?: string
 }
 
 export default async function CommandPage({
@@ -45,9 +46,16 @@ export default async function CommandPage({
 
   const sp = await searchParams
 
-  const [stats, tasks, pendingSubmissions, pendingExtensions] = await Promise.all([
+  const [stats, workloads, tasks, pendingSubmissions, pendingExtensions] = await Promise.all([
     getCommandDashboardStats(),
-    getAllTasks({ pillar_id: sp.pillar, status: sp.status, priority: sp.priority, search: sp.search }),
+    getPillarWorkloadStats(),
+    getAllTasks({
+      pillar_id: sp.pillar,
+      status: sp.status,
+      priority: sp.priority,
+      search: sp.search,
+      has_kpi_ref: sp.kpi === '1' ? true : undefined,
+    }),
     getPendingSubmissions(),
     getPendingExtensionRequests(),
   ])
@@ -81,6 +89,9 @@ export default async function CommandPage({
         <SummaryCard label="Blocked" value={stats.blocked} icon={Ban} color="orange" />
       </div>
 
+      {/* Pillar Workload View (Phase 3) */}
+      <PillarWorkloadSection workloads={workloads} />
+
       {/* Extension Requests Widget (Phase 2) */}
       <ExtensionRequestsWidget requests={pendingExtensions} />
 
@@ -99,34 +110,26 @@ export default async function CommandPage({
       )}
 
       {/* All Tasks */}
-      <section>
+      <section id="all-tasks">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
           <h2 style={{ fontSize: '16px', fontWeight: 600 }}>All Tasks</h2>
           <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{tasks.length} tasks</span>
         </div>
 
-        <TaskFilters />
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
-          {tasks.length === 0 ? (
-            <EmptyState
-              icon={CheckSquare}
-              title="No tasks found"
-              description="Try adjusting your filters, or create a new task."
-              action={<CreateTaskButton />}
-            />
-          ) : (
-            tasks.map((task) => (
-              <Link
-                key={task.id}
-                href={`/command/tasks/${task.id}`}
-                style={{ textDecoration: 'none', display: 'block' }}
-              >
-                <TaskCard task={task} showPillar />
-              </Link>
-            ))
-          )}
+        <div style={{ marginBottom: '16px' }}>
+          <TaskFilters />
         </div>
+
+        {tasks.length === 0 ? (
+          <EmptyState
+            icon={CheckSquare}
+            title="No tasks found"
+            description="Try adjusting your filters, or create a new task."
+            action={<CreateTaskButton />}
+          />
+        ) : (
+          <AllTasksTable tasks={tasks} showPillar />
+        )}
       </section>
     </div>
   )

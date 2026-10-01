@@ -3,11 +3,18 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createTaskSchema } from '@/lib/validations/task'
-import { createTask, updateTaskStatus } from '@/lib/db/tasks'
+import {
+  createTask,
+  updateTaskStatus,
+  bulkReassignTasks,
+  bulkUpdateDueDate,
+  bulkUpdatePriority,
+  stopTaskRecurrence,
+} from '@/lib/db/tasks'
 import { reviewSubmission } from '@/lib/db/submissions'
 import { createNotifications } from '@/lib/db/notifications'
 import { addAuditLog } from '@/lib/db/audit-log'
-import type { ActionResult, Task } from '@/types/database'
+import type { ActionResult, Task, TaskRecurrence, TaskPriority } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
 async function getAdminUser() {
@@ -29,6 +36,7 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
   const admin = await getAdminUser()
   if (!admin) return { data: null, error: 'Unauthorized' }
 
+  const recurrenceValue = (formData.get('recurrence') as string) || 'none'
   const raw = {
     title: formData.get('title') as string,
     description: formData.get('description') as string || '',
@@ -37,7 +45,7 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
     priority: formData.get('priority') as string || 'medium',
     due_date: (formData.get('due_date') as string) || null,
     kpi_ref: (formData.get('kpi_ref') as string) || null,
-    recurrence: 'none' as const,
+    recurrence: recurrenceValue as TaskRecurrence,
   }
 
   const parsed = createTaskSchema.safeParse(raw)
@@ -58,7 +66,7 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
     entity: 'tasks',
     entity_id: task.id,
     before: null,
-    after: { title: task.title, status: task.status, priority: task.priority },
+    after: { title: task.title, status: task.status, priority: task.priority, recurrence: task.recurrence },
   })
 
   // Notify assignee
@@ -72,6 +80,7 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
   }
 
   revalidatePath('/command')
+  revalidatePath('/command/tasks')
   revalidatePath('/head')
   return result
 }
@@ -85,7 +94,11 @@ export async function approveSubmissionAction(
   if (!admin) return { data: null, error: 'Unauthorized' }
 
   const supabase = await createClient()
-  const { data: taskBefore } = await supabase.from('tasks').select('status').eq('id', taskId).single()
+  const { data: taskBefore } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('id', taskId)
+    .single()
 
   const subResult = await reviewSubmission(submissionId, 'approved', null, admin.id)
   if (subResult.error) return { data: null, error: subResult.error }
@@ -109,9 +122,195 @@ export async function approveSubmissionAction(
     message: 'Your submission was approved! 🎉',
   }])
 
+  // Phase 3: Check recurrence on the task
+  if (taskBefore && taskBefore.recurrence && taskBefore.recurrence !== 'none') {
+    let nextDueDate: string | null = null
+    const baseDate = taskBefore.due_date ? new Date(taskBefore.due_date) : new Date()
+
+    if (taskBefore.recurrence === 'weekly') {
+      const nextDate = new Date(baseDate)
+      nextDate.setDate(nextDate.getDate() + 7)
+      nextDueDate = nextDate.toISOString().split('T')[0]
+    } else if (taskBefore.recurrence === 'monthly') {
+      const nextDate = new Date(baseDate)
+      nextDate.setMonth(nextDate.getMonth() + 1)
+      nextDueDate = nextDate.toISOString().split('T')[0]
+    } else if (taskBefore.recurrence === 'biweekly') {
+      const nextDate = new Date(baseDate)
+      nextDate.setDate(nextDate.getDate() + 14)
+      nextDueDate = nextDate.toISOString().split('T')[0]
+    }
+
+    const newInstanceResult = await createTask(
+      {
+        title: taskBefore.title,
+        description: taskBefore.description || '',
+        pillar_id: taskBefore.pillar_id,
+        assignee_id: taskBefore.assignee_id,
+        priority: taskBefore.priority,
+        due_date: nextDueDate,
+        kpi_ref: taskBefore.kpi_ref,
+        recurrence: taskBefore.recurrence,
+      },
+      admin.id
+    )
+
+    if (newInstanceResult.data) {
+      const nextTask = newInstanceResult.data
+      await addAuditLog({
+        actor_id: admin.id,
+        action: 'task.recurring_instance_created',
+        entity: 'tasks',
+        entity_id: nextTask.id,
+        before: { parent_task_id: taskId },
+        after: {
+          title: nextTask.title,
+          recurrence: nextTask.recurrence,
+          due_date: nextDueDate,
+        },
+      })
+
+      if (nextTask.assignee_id) {
+        await createNotifications([
+          {
+            user_id: nextTask.assignee_id,
+            type: 'task_assigned',
+            task_id: nextTask.id,
+            message: `New recurring instance created: "${nextTask.title}"`,
+          },
+        ])
+      }
+    }
+  }
+
   revalidatePath('/command')
+  revalidatePath('/command/tasks')
   revalidatePath('/head')
   return { data: null, error: null }
+}
+
+export async function stopTaskRecurrenceAction(taskId: string): Promise<ActionResult<null>> {
+  const admin = await getAdminUser()
+  if (!admin) return { data: null, error: 'Unauthorized' }
+
+  const supabase = await createClient()
+  const { data: before } = await supabase.from('tasks').select('recurrence').eq('id', taskId).single()
+
+  const result = await stopTaskRecurrence(taskId)
+  if (result.error) return { data: null, error: result.error }
+
+  await addAuditLog({
+    actor_id: admin.id,
+    action: 'task.recurrence_stopped',
+    entity: 'tasks',
+    entity_id: taskId,
+    before: { recurrence: before?.recurrence },
+    after: { recurrence: 'none' },
+  })
+
+  revalidatePath('/command')
+  revalidatePath('/command/tasks')
+  revalidatePath(`/command/tasks/${taskId}`)
+  revalidatePath('/head')
+  return { data: null, error: null }
+}
+
+export async function bulkReassignAction(
+  taskIds: string[],
+  newAssigneeId: string
+): Promise<ActionResult<{ count: number }>> {
+  const admin = await getAdminUser()
+  if (!admin) return { data: null, error: 'Unauthorized' }
+
+  if (!taskIds || taskIds.length === 0) {
+    return { data: null, error: 'No tasks selected' }
+  }
+
+  const result = await bulkReassignTasks(taskIds, newAssigneeId)
+  if (result.error) return result
+
+  // Write ONE grouped audit_log entry
+  await addAuditLog({
+    actor_id: admin.id,
+    action: 'bulk_reassign',
+    entity: 'tasks',
+    entity_id: taskIds[0],
+    before: { taskIds },
+    after: { newAssigneeId, count: taskIds.length },
+  })
+
+  // Notify new assignee ONCE with count
+  await createNotifications([
+    {
+      user_id: newAssigneeId,
+      type: 'task_assigned',
+      task_id: taskIds[0],
+      message: `You have been assigned ${taskIds.length} tasks`,
+    },
+  ])
+
+  revalidatePath('/command')
+  revalidatePath('/command/tasks')
+  revalidatePath('/head')
+  return result
+}
+
+export async function bulkChangeDueDateAction(
+  taskIds: string[],
+  dueDate: string
+): Promise<ActionResult<{ count: number }>> {
+  const admin = await getAdminUser()
+  if (!admin) return { data: null, error: 'Unauthorized' }
+
+  if (!taskIds || taskIds.length === 0) {
+    return { data: null, error: 'No tasks selected' }
+  }
+
+  const result = await bulkUpdateDueDate(taskIds, dueDate)
+  if (result.error) return result
+
+  await addAuditLog({
+    actor_id: admin.id,
+    action: 'bulk_change_due_date',
+    entity: 'tasks',
+    entity_id: taskIds[0],
+    before: { taskIds },
+    after: { due_date: dueDate, count: taskIds.length },
+  })
+
+  revalidatePath('/command')
+  revalidatePath('/command/tasks')
+  revalidatePath('/head')
+  return result
+}
+
+export async function bulkChangePriorityAction(
+  taskIds: string[],
+  priority: TaskPriority
+): Promise<ActionResult<{ count: number }>> {
+  const admin = await getAdminUser()
+  if (!admin) return { data: null, error: 'Unauthorized' }
+
+  if (!taskIds || taskIds.length === 0) {
+    return { data: null, error: 'No tasks selected' }
+  }
+
+  const result = await bulkUpdatePriority(taskIds, priority)
+  if (result.error) return result
+
+  await addAuditLog({
+    actor_id: admin.id,
+    action: 'bulk_change_priority',
+    entity: 'tasks',
+    entity_id: taskIds[0],
+    before: { taskIds },
+    after: { priority, count: taskIds.length },
+  })
+
+  revalidatePath('/command')
+  revalidatePath('/command/tasks')
+  revalidatePath('/head')
+  return result
 }
 
 export async function returnSubmissionAction(

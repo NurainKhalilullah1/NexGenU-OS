@@ -4,7 +4,7 @@ import type { Task } from '@/types/database'
 import { StatusBadge } from './StatusBadge'
 import { PriorityBadge } from './PriorityBadge'
 import { formatDueDate, isOverdue } from '@/lib/utils'
-import { Calendar, User, CalendarClock, MessageSquare } from 'lucide-react'
+import { Calendar, User, CalendarClock, MessageSquare, Repeat, Link as LinkIcon } from 'lucide-react'
 
 interface TaskCardProps {
   task: Task
@@ -139,6 +139,45 @@ export function TaskCard({ task, onClick, showPillar = false }: TaskCardProps) {
             >
               <CalendarClock size={10} />
               Extension Pending
+            </span>
+          )}
+
+          {task.recurrence && task.recurrence !== 'none' && (
+            <span
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: '11px',
+                color: 'var(--color-accent)',
+                background: 'rgba(185, 251, 194, 0.12)',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                border: '1px solid rgba(185, 251, 194, 0.3)',
+              }}
+              title={`Recurring task (${task.recurrence})`}
+            >
+              <Repeat size={10} />
+              {task.recurrence.charAt(0).toUpperCase() + task.recurrence.slice(1)}
+            </span>
+          )}
+
+          {task.kpi_ref && (
+            <span
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: '11px',
+                color: 'var(--text-secondary)',
+                background: 'var(--surface-3)',
+                padding: '1px 6px',
+                borderRadius: '4px',
+              }}
+              title={`KPI Reference: ${task.kpi_ref}`}
+            >
+              <LinkIcon size={10} />
+              KPI
             </span>
           )}
 
