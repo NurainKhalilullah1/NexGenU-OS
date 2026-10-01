@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { stopTaskRecurrenceAction } from '@/app/(dashboard)/command/actions'
-import { RepeatOff, Loader2 } from 'lucide-react'
+import { Repeat, Loader2 } from 'lucide-react'
 
 export function StopRecurrenceButton({ taskId }: { taskId: string }) {
   const router = useRouter()
@@ -29,7 +29,7 @@ export function StopRecurrenceButton({ taskId }: { taskId: string }) {
       {loading ? (
         <Loader2 size={13} style={{ animation: 'spin 0.7s linear infinite' }} />
       ) : (
-        <RepeatOff size={13} />
+        <Repeat size={13} style={{ opacity: 0.6 }} />
       )}
       Stop recurrence after this
     </button>
