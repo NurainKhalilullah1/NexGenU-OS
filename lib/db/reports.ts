@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getAllPillars } from '@/lib/db/pillars'
 import { isOverdue } from '@/lib/utils'
+import type { TaskStatus } from '@/types/database'
 
 export type PeriodType = 'this_month' | 'last_month' | 'all_time' | 'custom'
 
@@ -170,7 +171,7 @@ export async function getOverdueTasksReport(): Promise<{
   const rawTasks = (tasks ?? []) as unknown as TaskWithRelations[]
 
   for (const t of rawTasks) {
-    if (isOverdue(t.due_date, t.status) && t.due_date) {
+    if (isOverdue(t.due_date, t.status as TaskStatus) && t.due_date) {
       const due = new Date(t.due_date)
       const diffMs = now.getTime() - due.getTime()
       const daysOverdue = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)))

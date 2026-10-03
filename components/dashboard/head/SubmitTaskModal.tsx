@@ -378,7 +378,7 @@ export function SubmitTaskModal({ taskId, taskTitle, open, onClose }: SubmitTask
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                      <FileText size={16} color="var(--color-accent)" flexShrink={0} />
+                      <span style={{ flexShrink: 0, display: 'flex' }}><FileText size={16} color="var(--color-accent)" /></span>
                       <span style={{ fontSize: '13px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {file.name}
                       </span>

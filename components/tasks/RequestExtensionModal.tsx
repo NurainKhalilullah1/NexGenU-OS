@@ -147,7 +147,7 @@ export function RequestExtensionModal({
               gap: '8px',
             }}
           >
-            <AlertCircle size={16} flexShrink={0} />
+            <span style={{ flexShrink: 0, display: 'flex' }}><AlertCircle size={16} /></span>
             <span>{error}</span>
           </div>
         )}
