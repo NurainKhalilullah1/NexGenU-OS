@@ -28,6 +28,7 @@ From: ${fromAddress}
       html,
     })
 
+    console.log(`[SMTP Sent Successfully] To: ${to} | Subject: "${subject}"`)
     return { success: true }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to send email'
