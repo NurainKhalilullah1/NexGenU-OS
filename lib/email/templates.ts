@@ -5,7 +5,7 @@ const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-  'http://localhost:3000'
+  'https://nexgenu-os.vercel.app'
 
 interface BaseEmailOptions {
   title: string
@@ -18,12 +18,14 @@ interface BaseEmailOptions {
 
 function renderBaseEmail({
   title,
+  preheader,
   contentHtml,
   actionUrl,
   actionLabel,
   accentColor = '#B9FBC2',
 }: BaseEmailOptions): string {
   const settingsUrl = `${APP_URL}/settings/notifications`
+  const previewText = preheader || title
 
   return `<!DOCTYPE html>
 <html>
@@ -33,6 +35,9 @@ function renderBaseEmail({
   <title>${title}</title>
 </head>
 <body style="margin: 0; padding: 24px; background-color: #1B2E34; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF;">
+  <div style="display:none;font-size:1px;color:#1B2E34;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+    ${previewText}
+  </div>
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto;">
     <!-- Logo Header -->
     <tr>
@@ -159,7 +164,7 @@ export function taskOverdueEmail(params: {
 }): { subject: string; html: string } {
   const taskUrl = `${APP_URL}/${params.isAdmin ? 'command' : 'head'}/tasks/${params.taskId}`
   return {
-    subject: `[URGENT] Overdue Task: ${params.taskTitle}`,
+    subject: `Notice: Task Overdue — ${params.taskTitle}`,
     html: renderBaseEmail({
       title: 'Task Overdue Alert',
       accentColor: '#FF6300',
