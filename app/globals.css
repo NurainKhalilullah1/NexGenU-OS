@@ -468,6 +468,14 @@ select.input option { background: var(--surface-2); }
     gap: 8px !important;
   }
 
+  /* Completely hide desktop sidebar on mobile */
+  .dashboard-sidebar-wrapper,
+  .dashboard-sidebar,
+  aside.dashboard-sidebar,
+  [data-sidebar="true"] {
+    display: none !important;
+  }
+
   /* Tables — horizontal scroll so they don't overflow */
   .table-wrapper {
     overflow-x: auto;

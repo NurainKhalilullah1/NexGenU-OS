@@ -35,8 +35,8 @@ export default async function DashboardLayout({
         background: 'var(--surface-0)',
       }}
     >
-      {/* Sidebar — hidden on mobile */}
-      <div style={{ display: 'flex' }} className="hidden md:flex">
+      {/* Sidebar — hidden on mobile, visible on desktop (md+) */}
+      <div className="dashboard-sidebar-wrapper hidden md:flex h-full shrink-0">
         <Sidebar user={user} />
       </div>
 

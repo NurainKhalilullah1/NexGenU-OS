@@ -73,15 +73,14 @@ export function Sidebar({ user }: SidebarProps) {
 
   return (
     <aside
+      className="dashboard-sidebar hidden md:flex flex-col h-full shrink-0"
+      data-sidebar="true"
       style={{
         width: collapsed ? 64 : 240,
         background: 'var(--surface-2)',
         borderRight: '1px solid var(--border-default)',
-        display: 'flex',
-        flexDirection: 'column',
         height: '100%',
         transition: 'width 300ms ease',
-        flexShrink: 0,
         position: 'relative',
       }}
     >
