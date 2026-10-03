@@ -2,6 +2,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -10,7 +11,6 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Zap,
   FileText,
   Settings,
   BarChart3,
@@ -89,17 +89,24 @@ export function Sidebar({ user }: SidebarProps) {
       >
         <div
           style={{
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             borderRadius: '8px',
-            background: 'var(--color-accent)',
+            background: 'var(--color-surface)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
+            border: '1px solid var(--border-subtle)',
           }}
         >
-          <Zap size={18} color="var(--surface-0)" />
+          <Image
+            src="/images/nexgenu-logo.png"
+            alt="NexGenU"
+            width={24}
+            height={24}
+            style={{ objectFit: 'contain' }}
+          />
         </div>
         {!collapsed && (
           <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>

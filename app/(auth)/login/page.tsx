@@ -1,7 +1,7 @@
 // app/(auth)/login/page.tsx
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { LoginForm } from './LoginForm'
-import { Zap } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Sign In',
@@ -59,17 +59,24 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: '14px',
-              background: 'var(--color-accent)',
+              width: 72,
+              height: 72,
+              borderRadius: '16px',
+              background: 'var(--color-surface)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 16px',
+              border: '1px solid var(--border-subtle)',
             }}
           >
-            <Zap size={28} color="var(--surface-0)" />
+            <Image
+              src="/images/nexgenu-logo.png"
+              alt="NexGenU Logo"
+              width={52}
+              height={52}
+              style={{ objectFit: 'contain' }}
+            />
           </div>
           <h1
             style={{
