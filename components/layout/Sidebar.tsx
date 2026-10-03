@@ -14,6 +14,7 @@ import {
   FileText,
   Settings,
   BarChart3,
+  Inbox,
 } from 'lucide-react'
 import type { User } from '@/types/database'
 
@@ -46,6 +47,9 @@ export function Sidebar({ user }: SidebarProps) {
     (item) => !(!item.adminOnly && isAdmin)
   )
 
+  const isHead = user.role === 'head'
+  const isMember = user.role === 'member'
+
   const sidebarItems = isAdmin
     ? [
         { href: '/command', label: 'Command Center', icon: LayoutDashboard },
@@ -55,9 +59,15 @@ export function Sidebar({ user }: SidebarProps) {
         { href: '/command/audit', label: 'Audit Log', icon: FileText },
         { href: '/settings/notifications', label: 'Notification Settings', icon: Settings },
       ]
-    : [
+    : isHead
+    ? [
         { href: '/head', label: 'My Dashboard', icon: LayoutDashboard },
         { href: '/head/tasks', label: 'My Tasks', icon: CheckSquare },
+        { href: '/head/team-inbox', label: 'Team Inbox', icon: Inbox },
+        { href: '/settings/notifications', label: 'Notification Settings', icon: Settings },
+      ]
+    : [
+        { href: '/member', label: 'My Workspace', icon: LayoutDashboard },
         { href: '/settings/notifications', label: 'Notification Settings', icon: Settings },
       ]
 

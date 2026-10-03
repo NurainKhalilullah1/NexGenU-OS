@@ -1,7 +1,7 @@
 // types/database.ts
 // Hand-written until `supabase gen types` can run after migrations are applied.
 
-export type Role = 'admin' | 'head'
+export type Role = 'admin' | 'head' | 'member'
 export type TaskStatus = 'not_started' | 'in_progress' | 'blocked' | 'submitted' | 'returned' | 'approved'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
 export type TaskRecurrence = 'none' | 'weekly' | 'biweekly' | 'monthly'
@@ -16,6 +16,8 @@ export type NotificationType =
   | 'extension_decided'
   | 'new_comment'
   | 'extension_requested'
+  | 'internal_submission_received'  // member submitted to head
+  | 'internal_submission_reviewed'  // head reviewed member's submission
 export type ExtensionStatus = 'pending' | 'approved' | 'declined' | 'denied'
 
 export interface Pillar {
@@ -93,6 +95,22 @@ export interface Submission {
   reviewed_at: string | null
   user?: User
   reviewer?: User
+}
+
+export interface InternalSubmission {
+  id: string
+  task_id: string
+  submitted_by: string
+  notes: string
+  file_urls: string[]
+  status: 'pending' | 'approved' | 'returned'
+  head_feedback: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  created_at: string
+  submitter?: User
+  reviewer?: User
+  task?: Pick<Task, 'id' | 'title' | 'pillar_id'>
 }
 
 export interface Comment {

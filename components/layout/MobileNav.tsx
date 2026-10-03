@@ -2,7 +2,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, CheckSquare, ClipboardList, Bell } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, ClipboardList, Bell, Inbox } from 'lucide-react'
 import type { User } from '@/types/database'
 
 interface MobileNavProps {
@@ -20,9 +20,14 @@ export function MobileNav({ user, unreadCount = 0 }: MobileNavProps) {
         { href: '/command/tasks', label: 'Tasks', icon: CheckSquare },
         { href: '/command/review', label: 'Review', icon: ClipboardList },
       ]
-    : [
+    : user.role === 'head'
+    ? [
         { href: '/head', label: 'Dashboard', icon: LayoutDashboard },
         { href: '/head/tasks', label: 'Tasks', icon: CheckSquare },
+        { href: '/head/team-inbox', label: 'Inbox', icon: Inbox },
+      ]
+    : [
+        { href: '/member', label: 'My Work', icon: LayoutDashboard },
       ]
 
   return (

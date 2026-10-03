@@ -73,8 +73,8 @@ export default function LoginPage() {
             <Image
               src="/images/nexgenu-logo.png"
               alt="NexGenU Logo"
-              width={52}
-              height={52}
+              width={45}
+              height={45}
               style={{ objectFit: 'contain' }}
             />
           </div>

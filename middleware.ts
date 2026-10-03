@@ -26,7 +26,9 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/login')) {
     if (user) {
       const role = await getRoleFromDB(user.id, request)
-      return NextResponse.redirect(new URL(role === 'admin' ? '/command' : '/head', request.url))
+      if (role === 'admin') return NextResponse.redirect(new URL('/command', request.url))
+      if (role === 'head') return NextResponse.redirect(new URL('/head', request.url))
+      return NextResponse.redirect(new URL('/member', request.url))
     }
     return response
   }
@@ -39,13 +41,16 @@ export async function middleware(request: NextRequest) {
   }
 
   // Role-based access control — role is read from DB, never from JWT/cookie
-  if (pathname.startsWith('/command') || pathname.startsWith('/head')) {
+  if (pathname.startsWith('/command') || pathname.startsWith('/head') || pathname.startsWith('/member')) {
     const role = await getRoleFromDB(user.id, request)
     if (pathname.startsWith('/command') && role !== 'admin') {
-      return NextResponse.redirect(new URL('/head', request.url))
+      return NextResponse.redirect(new URL(role === 'head' ? '/head' : '/member', request.url))
     }
     if (pathname.startsWith('/head') && role !== 'head') {
-      return NextResponse.redirect(new URL('/command', request.url))
+      return NextResponse.redirect(new URL(role === 'admin' ? '/command' : '/member', request.url))
+    }
+    if (pathname.startsWith('/member') && role !== 'member') {
+      return NextResponse.redirect(new URL(role === 'admin' ? '/command' : '/head', request.url))
     }
   }
 

@@ -1,12 +1,13 @@
-// app/layout.tsx — Root layout with Inter font (Nohemi self-hosted per spec)
+// app/layout.tsx — Root layout with Sora font
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Sora } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({
+const sora = Sora({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-sora',
   display: 'swap',
+  weight: ['300', '400', '500', '600', '700', '800'],
 })
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    <html lang="en" className={`${sora.variable} h-full`}>
       <body className="h-full antialiased">{children}</body>
     </html>
   )

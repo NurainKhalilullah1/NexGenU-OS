@@ -77,7 +77,7 @@
   --color-surface-3: #325666;
 
   /* Typography scale */
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-sora);
 }
 
 :root {
@@ -140,7 +140,7 @@ body {
   margin: 0;
   background: var(--surface-0);
   color: var(--text-primary);
-  font-family: 'Nohemi', var(--font-inter, 'Inter'), system-ui, sans-serif;
+  font-family: 'Sora', var(--font-sora, system-ui, sans-serif);
   font-size: 14px;
   line-height: 1.5;
 }
