@@ -11,7 +11,7 @@ export async function getAllTasks(filters?: {
   search?: string
   has_kpi_ref?: boolean
 }): Promise<Task[]> {
-  const supabase = await createClient()
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY ? createServiceClient() : await createClient()
 
   let query = supabase
     .from('tasks')
@@ -54,7 +54,7 @@ export async function getAllTasks(filters?: {
 }
 
 export async function getTaskById(id: string): Promise<Task | null> {
-  const supabase = await createClient()
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY ? createServiceClient() : await createClient()
 
   const { data, error } = await supabase
     .from('tasks')
@@ -164,7 +164,7 @@ export async function getCommandDashboardStats(): Promise<{
   awaitingReview: number
   blocked: number
 }> {
-  const supabase = await createClient()
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY ? createServiceClient() : await createClient()
 
   const { data: tasks } = await supabase
     .from('tasks')
@@ -232,7 +232,7 @@ export async function getHeadDashboardStats(pillarId: string): Promise<{
 }
 
 export async function getPillarWorkloadStats(): Promise<PillarWorkload[]> {
-  const supabase = await createClient()
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY ? createServiceClient() : await createClient()
   const pillars = await getAllPillars()
 
   const { data: tasks, error } = await supabase

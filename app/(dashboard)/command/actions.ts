@@ -22,6 +22,21 @@ import {
 import type { ActionResult, Task, TaskRecurrence, TaskPriority } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
+async function getAdminUser() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'admin') return null
+  return profile
+}
+
 async function getAuthorizedTaskCreator() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
