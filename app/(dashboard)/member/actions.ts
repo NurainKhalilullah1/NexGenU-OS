@@ -1,4 +1,4 @@
-﻿// app/(dashboard)/member/actions.ts
+// app/(dashboard)/member/actions.ts
 'use server'
 import { createClient } from '@/lib/supabase/server'
 import { createInternalSubmission } from '@/lib/db/internal-submissions'
@@ -50,7 +50,7 @@ export async function memberSubmitTaskAction(
         user_id: h.id,
         type: 'internal_submission_received' as const,
         task_id: taskId,
-        message: ${member.full_name} submitted work for your review.,
+        message: `${member.full_name} submitted work for your review.`,
       }))
     )
   }
@@ -65,6 +65,5 @@ export async function memberSubmitTaskAction(
   })
 
   revalidatePath('/member')
-  revalidatePath(/member/tasks/)
   return result
 }

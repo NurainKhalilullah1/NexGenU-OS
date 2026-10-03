@@ -197,16 +197,30 @@ export function Sidebar({ user }: SidebarProps) {
         >
           <span
             style={{
-              background: isAdmin ? 'rgba(185,251,194,0.12)' : 'rgba(207,193,252,0.12)',
-              color: isAdmin ? 'var(--color-accent)' : 'var(--color-lavender)',
-              border: `1px solid ${isAdmin ? 'rgba(185,251,194,0.3)' : 'rgba(207,193,252,0.3)'}`,
+              background: isAdmin
+                ? 'rgba(185,251,194,0.12)'
+                : isHead
+                ? 'rgba(207,193,252,0.12)'
+                : 'rgba(255,255,255,0.08)',
+              color: isAdmin
+                ? 'var(--color-accent)'
+                : isHead
+                ? 'var(--color-lavender)'
+                : 'var(--text-primary)',
+              border: `1px solid ${
+                isAdmin
+                  ? 'rgba(185,251,194,0.3)'
+                  : isHead
+                  ? 'rgba(207,193,252,0.3)'
+                  : 'var(--border-subtle)'
+              }`,
               borderRadius: '4px',
               padding: '2px 8px',
               fontSize: '11px',
               fontWeight: 600,
             }}
           >
-            {isAdmin ? 'Admin' : 'Head'}
+            {isAdmin ? 'Admin' : isHead ? 'Head' : 'Member'}
           </span>
         </div>
       )}

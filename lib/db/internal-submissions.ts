@@ -6,13 +6,19 @@ import type { InternalSubmission, ActionResult } from '@/types/database'
 /** Get all pending internal submissions for a head's pillar */
 export async function getInternalSubmissionsForHead(pillarId: string): Promise<InternalSubmission[]> {
   const supabase = await createClient()
+  const { data: pillarTasks } = await supabase
+    .from('tasks')
+    .select('id')
+    .eq('pillar_id', pillarId)
+
+  const taskIds = (pillarTasks ?? []).map((t) => t.id)
+  if (taskIds.length === 0) return []
+
   const { data } = await supabase
     .from('internal_submissions')
     .select('*, submitter:users!submitted_by(id, full_name, email, role), task:tasks!task_id(id, title, pillar_id)')
     .eq('status', 'pending')
-    .in('task_id',
-      supabase.from('tasks').select('id').eq('pillar_id', pillarId)
-    )
+    .in('task_id', taskIds)
     .order('created_at', { ascending: false })
   return (data ?? []) as InternalSubmission[]
 }

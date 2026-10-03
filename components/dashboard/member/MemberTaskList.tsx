@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 // components/dashboard/member/MemberTaskList.tsx
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -62,7 +62,7 @@ export function MemberTaskList({ tasks, submissions, memberId }: Props) {
               key={task.id}
               style={{
                 background: 'var(--surface-2)',
-                border: 1px solid ,
+                border: overdue ? '1px solid var(--color-orange)' : '1px solid var(--border-subtle)',
                 borderRadius: '10px',
                 padding: '16px',
                 display: 'flex',
