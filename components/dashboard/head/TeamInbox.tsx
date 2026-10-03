@@ -1,10 +1,11 @@
-﻿'use client'
+'use client'
 // components/dashboard/head/TeamInbox.tsx
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { InternalSubmission } from '@/types/database'
 import { reviewMemberSubmissionAction } from '@/app/(dashboard)/head/team-inbox/actions'
 import { CheckCircle2, RotateCcw, User as UserIcon, Loader2, Inbox } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 interface Props { submissions: InternalSubmission[]; headId: string }
 
@@ -19,6 +20,7 @@ export function TeamInbox({ submissions, headId }: Props) {
     setErrors({})
     if (!fb.trim()) {
       setErrors((p) => ({ ...p, [sub.id]: 'Feedback is required before approving or returning.' }))
+      toast.warning('Feedback is required before approving or returning.')
       return
     }
     setLoading(sub.id + status)
@@ -26,7 +28,13 @@ export function TeamInbox({ submissions, headId }: Props) {
     setLoading(null)
     if (result.error) {
       setErrors((p) => ({ ...p, [sub.id]: result.error! }))
+      toast.error(result.error)
       return
+    }
+    if (status === 'approved') {
+      toast.success('Member submission approved!')
+    } else {
+      toast.info('Submission returned with feedback.')
     }
     setFeedback((p) => ({ ...p, [sub.id]: '' }))
     router.refresh()

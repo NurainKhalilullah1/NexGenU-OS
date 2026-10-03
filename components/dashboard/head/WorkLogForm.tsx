@@ -7,6 +7,7 @@ import type { TaskLog } from '@/types/database'
 import { addWorkLogAction } from '@/app/(dashboard)/head/actions'
 import { formatDate } from '@/lib/utils'
 import { Clock, Plus, Loader2, Lock, Check } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 interface WorkLogFormProps {
   taskId: string
@@ -36,10 +37,12 @@ export function WorkLogForm({ taskId, logs, isTaskLocked = false }: WorkLogFormP
 
     if (result.error) {
       setError(result.error)
+      toast.error(result.error)
       setLoading(false)
       return
     }
 
+    toast.success('Work log recorded!')
     setSuccess(true)
     setLoading(false)
     form.reset()

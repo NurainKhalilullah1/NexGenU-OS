@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 type Mode = 'password' | 'magic-link'
 
@@ -29,6 +30,7 @@ export function LoginForm() {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw new Error(error.message)
 
+        toast.success('Signed in successfully!')
         router.push('/')
         router.refresh()
       } else {
@@ -37,10 +39,13 @@ export function LoginForm() {
           options: { emailRedirectTo: `${window.location.origin}/` },
         })
         if (error) throw new Error(error.message)
+        toast.info('Magic link sent to your email.')
         setMagicSent(true)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const msg = err instanceof Error ? err.message : 'An error occurred'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

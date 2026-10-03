@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { submitTaskAction } from '@/app/(dashboard)/head/actions'
 import { createClient } from '@/lib/supabase/client'
 import { X, Plus, Trash2, Loader2, Send, Link as LinkIcon, Paperclip, FileText } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 interface SubmitTaskModalProps {
   taskId: string
@@ -50,18 +51,21 @@ export function SubmitTaskModal({ taskId, taskTitle, open, onClose }: SubmitTask
 
     if (files.length + selected.length > MAX_FILES) {
       setError(`You can attach a maximum of ${MAX_FILES} files per submission.`)
+      toast.warning(`You can attach a maximum of ${MAX_FILES} files per submission.`)
       return
     }
 
     for (const file of selected) {
       if (file.size > MAX_FILE_SIZE) {
         setError(`File "${file.name}" exceeds the 50MB size limit.`)
+        toast.warning(`File "${file.name}" exceeds the 50MB size limit.`)
         return
       }
 
       const ext = file.name.split('.').pop()?.toLowerCase() || ''
       if (!ALLOWED_EXTENSIONS.includes(ext)) {
         setError(`File format ".${ext}" is not supported. Allowed formats: PDF, DOCX, XLSX, PNG, JPG, ZIP.`)
+        toast.warning(`File format ".${ext}" is not supported. Allowed formats: PDF, DOCX, XLSX, PNG, JPG, ZIP.`)
         return
       }
     }
@@ -98,6 +102,7 @@ export function SubmitTaskModal({ taskId, taskTitle, open, onClose }: SubmitTask
 
     if (!note && validLinks.length === 0 && files.length === 0) {
       setError('Please provide a note, at least one link, or an attached file')
+      toast.warning('Please provide a note, at least one link, or an attached file')
       setLoading(false)
       return
     }
@@ -110,6 +115,7 @@ export function SubmitTaskModal({ taskId, taskTitle, open, onClose }: SubmitTask
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
           setError('User session expired. Please reload and log in.')
+          toast.error('User session expired. Please reload and log in.')
           setLoading(false)
           return
         }
@@ -125,6 +131,7 @@ export function SubmitTaskModal({ taskId, taskTitle, open, onClose }: SubmitTask
           if (uploadErr) {
             console.error('Storage upload error:', uploadErr)
             setError(`Failed to upload "${file.name}": ${uploadErr.message}`)
+            toast.error(`Failed to upload "${file.name}": ${uploadErr.message}`)
             setLoading(false)
             return
           }
@@ -139,16 +146,19 @@ export function SubmitTaskModal({ taskId, taskTitle, open, onClose }: SubmitTask
 
       if (result.error) {
         setError(result.error)
+        toast.error(result.error)
         setLoading(false)
         return
       }
 
+      toast.success('Deliverable submitted to Command Center!')
       setLoading(false)
       router.refresh()
       onClose()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Submission failed'
       setError(msg)
+      toast.error(msg)
       setLoading(false)
     }
   }

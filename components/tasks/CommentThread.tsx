@@ -7,6 +7,7 @@ import { addCommentAction } from '@/app/(dashboard)/actions/collaboration'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { Send, Loader2, MessageSquare } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 interface CommentThreadProps {
   taskId: string
@@ -101,6 +102,7 @@ export function CommentThread({
 
     if (result.error) {
       setError(result.error)
+      toast.error(result.error)
       setSubmitting(false)
       return
     }
@@ -112,6 +114,7 @@ export function CommentThread({
         return [...prev, newComment]
       })
       setBody('')
+      toast.success('Comment posted!')
     }
 
     setSubmitting(false)

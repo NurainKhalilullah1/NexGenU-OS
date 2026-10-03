@@ -6,6 +6,7 @@ import { CheckCircle2, RotateCcw, Calendar, User, Loader2 } from 'lucide-react'
 import type { Submission } from '@/types/database'
 import { formatDate } from '@/lib/utils'
 import { approveSubmissionAction, returnSubmissionAction } from '@/app/(dashboard)/command/actions'
+import { toast } from '@/lib/toast'
 
 export type ReviewQueueSubmission = Submission & {
   task?: { id: string; title: string; pillar?: { name: string; nickname: string } }
@@ -28,7 +29,12 @@ export function ReviewQueueSection({ submissions }: ReviewQueueSectionProps) {
     if (!submission.task || !submission.user) return
     setLoadingId(submission.id)
     const result = await approveSubmissionAction(submission.id, submission.task.id, submission.user.id)
-    if (!result.error) router.refresh()
+    if (result.error) {
+      toast.error(result.error)
+    } else {
+      toast.success('Deliverable approved!')
+      router.refresh()
+    }
     setLoadingId(null)
   }
 
@@ -44,9 +50,11 @@ export function ReviewQueueSection({ submissions }: ReviewQueueSectionProps) {
     )
     if (result.error) {
       setReturnError(result.error)
+      toast.error(result.error)
       setReturnLoading(false)
       return
     }
+    toast.info('Submission returned to Head with feedback.')
     setReturnModal(null)
     setFeedback('')
     router.refresh()

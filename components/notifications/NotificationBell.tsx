@@ -5,6 +5,7 @@ import { Bell, Check, CheckCheck, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Notification } from '@/types/database'
 import { formatDate } from '@/lib/utils'
+import { toast } from '@/lib/toast'
 
 interface NotificationBellProps {
   userId: string
@@ -40,6 +41,9 @@ export function NotificationBell({
           const newNotif = payload.new as Notification
           setNotifications((prev) => [newNotif, ...prev].slice(0, 50))
           setUnreadCount((c) => c + 1)
+          toast.info(newNotif.message, {
+            title: newNotif.title || 'Notification',
+          })
         }
       )
       .subscribe()

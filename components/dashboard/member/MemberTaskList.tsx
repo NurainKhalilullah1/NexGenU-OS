@@ -8,6 +8,7 @@ import { PriorityBadge } from '@/components/tasks/PriorityBadge'
 import { formatDueDate, isOverdue } from '@/lib/utils'
 import { memberSubmitTaskAction } from '@/app/(dashboard)/member/actions'
 import { Send, AlertTriangle, CheckCircle2, RotateCcw, Loader2, X } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 interface Props {
   tasks: Task[]
@@ -36,7 +37,12 @@ export function MemberTaskList({ tasks, submissions, memberId }: Props) {
     fd.append('notes', notes[taskId] || '')
     const result = await memberSubmitTaskAction(fd)
     setLoading(false)
-    if (result.error) { setError(result.error); return }
+    if (result.error) {
+      setError(result.error)
+      toast.error(result.error)
+      return
+    }
+    toast.success('Work submitted to Head!')
     setOpenModal(null)
     setNotes((prev) => ({ ...prev, [taskId]: '' }))
     router.refresh()

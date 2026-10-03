@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
 import { createTaskAction } from '@/app/(dashboard)/command/actions'
+import { toast } from '@/lib/toast'
 import type { Pillar, User } from '@/types/database'
 
 interface CreateTaskModalProps {
@@ -51,10 +52,12 @@ export function CreateTaskModal({ open, onClose, defaultPillarId }: CreateTaskMo
 
     if (result.error) {
       setError(result.error)
+      toast.error(result.error)
       setLoading(false)
       return
     }
 
+    toast.success('Task created successfully!')
     router.refresh()
     onClose()
     setLoading(false)

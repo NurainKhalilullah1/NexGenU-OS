@@ -9,6 +9,7 @@ import {
   declineExtensionAction,
 } from '@/app/(dashboard)/actions/collaboration'
 import { CalendarClock, Check, X, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 interface ExtensionRequestsWidgetProps {
   requests: ExtensionRequest[]
@@ -30,7 +31,9 @@ export function ExtensionRequestsWidget({ requests }: ExtensionRequestsWidgetPro
     const result = await approveExtensionAction(requestId)
     if (result.error) {
       setError(result.error)
+      toast.error(result.error)
     } else {
+      toast.success('Extension request approved!')
       router.refresh()
     }
     setLoadingId(null)
@@ -39,6 +42,7 @@ export function ExtensionRequestsWidget({ requests }: ExtensionRequestsWidgetPro
   async function handleDecline(requestId: string) {
     if (!decisionNote.trim() || decisionNote.trim().length < 3) {
       setError('Please provide a reason for declining (minimum 3 characters)')
+      toast.warning('Please provide a reason for declining (minimum 3 characters)')
       return
     }
 
@@ -47,7 +51,9 @@ export function ExtensionRequestsWidget({ requests }: ExtensionRequestsWidgetPro
     const result = await declineExtensionAction(requestId, decisionNote.trim())
     if (result.error) {
       setError(result.error)
+      toast.error(result.error)
     } else {
+      toast.info('Extension request declined.')
       setDecliningId(null)
       setDecisionNote('')
       router.refresh()

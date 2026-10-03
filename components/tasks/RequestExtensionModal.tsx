@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { requestExtensionAction } from '@/app/(dashboard)/actions/collaboration'
 import { CalendarClock, X, Loader2, AlertCircle } from 'lucide-react'
+import { toast } from '@/lib/toast'
 
 interface RequestExtensionModalProps {
   taskId: string
@@ -40,11 +41,13 @@ export function RequestExtensionModal({
 
     if (!requestedDate) {
       setError('Please select a proposed new due date')
+      toast.warning('Please select a proposed new due date')
       return
     }
 
     if (reason.trim().length < 20) {
       setError('Please provide a detailed justification (minimum 20 characters)')
+      toast.warning('Please provide a detailed justification (minimum 20 characters)')
       return
     }
 
@@ -59,10 +62,12 @@ export function RequestExtensionModal({
 
     if (result.error) {
       setError(result.error)
+      toast.error(result.error)
       setLoading(false)
       return
     }
 
+    toast.success('Extension request submitted!')
     setLoading(false)
     router.refresh()
     onClose()

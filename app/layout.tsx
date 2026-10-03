@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   description: 'Internal task-assignment and execution-tracking system for NexGenU leadership and pillar heads',
 }
 
+import { ToastContainer } from '@/components/ui/ToastContainer'
+
 export default function RootLayout({
   children,
 }: {
@@ -25,7 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sora.variable} h-full`}>
-      <body className="h-full antialiased">{children}</body>
+      <body className="h-full antialiased">
+        {children}
+        <ToastContainer />
+      </body>
     </html>
   )
 }
