@@ -1,4 +1,4 @@
-﻿// lib/db/internal-submissions.ts
+// lib/db/internal-submissions.ts
 // Query helpers for the Member -> Head internal submission chain
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { InternalSubmission, ActionResult } from '@/types/database'
@@ -8,11 +8,7 @@ export async function getInternalSubmissionsForHead(pillarId: string): Promise<I
   const supabase = await createClient()
   const { data } = await supabase
     .from('internal_submissions')
-    .select(
-      *,
-      submitter:users!submitted_by(id, full_name, email, role),
-      task:tasks!task_id(id, title, pillar_id)
-    )
+    .select('*, submitter:users!submitted_by(id, full_name, email, role), task:tasks!task_id(id, title, pillar_id)')
     .eq('status', 'pending')
     .in('task_id',
       supabase.from('tasks').select('id').eq('pillar_id', pillarId)
