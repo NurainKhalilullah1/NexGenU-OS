@@ -14,6 +14,11 @@ import {
 import { reviewSubmission } from '@/lib/db/submissions'
 import { createNotifications } from '@/lib/db/notifications'
 import { addAuditLog } from '@/lib/db/audit-log'
+import {
+  sendTaskAssignedEmail,
+  sendSubmissionApprovedEmail,
+  sendSubmissionReturnedEmail,
+} from '@/lib/email/notifications'
 import type { ActionResult, Task, TaskRecurrence, TaskPriority } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
@@ -69,7 +74,7 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
     after: { title: task.title, status: task.status, priority: task.priority, recurrence: task.recurrence },
   })
 
-  // Notify assignee
+  // Notify assignee or pillar heads
   if (task.assignee_id) {
     await createNotifications([{
       user_id: task.assignee_id,
@@ -77,6 +82,41 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
       task_id: task.id,
       message: `New task assigned to you: "${task.title}"`,
     }])
+    sendTaskAssignedEmail({
+      headId: task.assignee_id,
+      taskTitle: task.title,
+      dueDate: task.due_date,
+      priority: task.priority,
+      taskId: task.id,
+    }).catch(console.error)
+  } else if (task.pillar_id) {
+    const supabase = await createClient()
+    const { data: pillarHeads } = await supabase
+      .from('users')
+      .select('id')
+      .eq('pillar_id', task.pillar_id)
+      .eq('role', 'head')
+      .eq('active', true)
+
+    if (pillarHeads && pillarHeads.length > 0) {
+      await createNotifications(
+        pillarHeads.map((h) => ({
+          user_id: h.id,
+          type: 'task_assigned' as const,
+          task_id: task.id,
+          message: `New task assigned to your pillar: "${task.title}"`,
+        }))
+      )
+      for (const h of pillarHeads) {
+        sendTaskAssignedEmail({
+          headId: h.id,
+          taskTitle: task.title,
+          dueDate: task.due_date,
+          priority: task.priority,
+          taskId: task.id,
+        }).catch(console.error)
+      }
+    }
   }
 
   revalidatePath('/command')
@@ -121,6 +161,13 @@ export async function approveSubmissionAction(
     task_id: taskId,
     message: 'Your submission was approved! 🎉',
   }])
+
+  sendSubmissionApprovedEmail({
+    headId: assigneeId,
+    taskTitle: taskBefore?.title ?? 'Task',
+    taskId,
+    feedback: null,
+  }).catch(console.error)
 
   // Phase 3: Check recurrence on the task
   if (taskBefore && taskBefore.recurrence && taskBefore.recurrence !== 'none') {
@@ -350,6 +397,13 @@ export async function returnSubmissionAction(
     task_id: taskId,
     message: `Your submission was returned with feedback: "${feedback.slice(0, 80)}${feedback.length > 80 ? '…' : ''}"`,
   }])
+
+  sendSubmissionReturnedEmail({
+    headId: assigneeId,
+    taskTitle: taskBefore?.title ?? 'Task',
+    taskId,
+    feedback,
+  }).catch(console.error)
 
   revalidatePath('/command')
   revalidatePath('/head')
