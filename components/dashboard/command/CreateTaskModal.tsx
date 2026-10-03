@@ -147,9 +147,11 @@ export function CreateTaskModal({ open, onClose }: CreateTaskModalProps) {
                 Assignee
               </label>
               <select id="task-assignee" name="assignee_id" className="input">
-                <option value="">Unassigned</option>
+                <option value="">Unassigned (Whole Pillar Team)</option>
                 {filteredHeads.map((h) => (
-                  <option key={h.id} value={h.id}>{h.full_name}</option>
+                  <option key={h.id} value={h.id}>
+                    {h.full_name} ({h.role === 'head' ? 'Head' : 'Member'})
+                  </option>
                 ))}
               </select>
             </div>

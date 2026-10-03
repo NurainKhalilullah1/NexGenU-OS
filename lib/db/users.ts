@@ -44,6 +44,20 @@ export async function getAllHeads(): Promise<User[]> {
   return data as User[]
 }
 
+export async function getAssignableUsers(): Promise<User[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('users')
+    .select('*, pillar:pillars(id, name, nickname)')
+    .in('role', ['head', 'member'])
+    .eq('active', true)
+    .order('role', { ascending: true })
+    .order('full_name')
+
+  if (error) return []
+  return data as User[]
+}
+
 export async function getAllUsers(): Promise<User[]> {
   const supabase = await createClient()
   const { data, error } = await supabase

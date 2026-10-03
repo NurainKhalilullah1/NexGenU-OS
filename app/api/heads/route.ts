@@ -1,8 +1,8 @@
 // app/api/heads/route.ts
 import { NextResponse } from 'next/server'
-import { getAllHeads } from '@/lib/db/users'
+import { getAssignableUsers } from '@/lib/db/users'
 
 export async function GET() {
-  const heads = await getAllHeads()
+  const heads = await getAssignableUsers()
   return NextResponse.json({ heads })
 }

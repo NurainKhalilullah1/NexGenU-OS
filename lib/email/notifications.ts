@@ -14,25 +14,34 @@ import {
 import { shouldSendEmail } from '@/lib/db/notification-settings'
 
 export async function sendTaskAssignedEmail(params: {
-  headId: string
+  recipientId?: string
+  headId?: string
   taskTitle: string
   dueDate: string | null
   priority: string
   taskId: string
 }) {
-  const allowed = await shouldSendEmail(params.headId, 'task_assigned')
+  const targetId = params.recipientId || params.headId
+  if (!targetId) return
+
+  const allowed = await shouldSendEmail(targetId, 'task_assigned')
   if (!allowed) return
 
   const supabase = createServiceClient()
-  const { data: user } = await supabase.from('users').select('full_name, email').eq('id', params.headId).single()
+  const { data: user } = await supabase
+    .from('users')
+    .select('full_name, email, role')
+    .eq('id', targetId)
+    .single()
   if (!user || !user.email) return
 
   const emailData = taskAssignedEmail({
-    headName: user.full_name || 'Team Lead',
+    recipientName: user.full_name || (user.role === 'member' ? 'Team Member' : 'Team Lead'),
     taskTitle: params.taskTitle,
     dueDate: params.dueDate,
     priority: params.priority,
     taskId: params.taskId,
+    role: user.role,
   })
 
   await sendEmail({

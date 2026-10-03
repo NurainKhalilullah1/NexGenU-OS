@@ -74,42 +74,77 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
     after: { title: task.title, status: task.status, priority: task.priority, recurrence: task.recurrence },
   })
 
-  // Notify assignee or pillar heads
+  // Notify assignee and pillar team (heads + members)
+  const supabase = await createClient()
+
   if (task.assignee_id) {
+    // Notify the specific assignee (head or member)
     await createNotifications([{
       user_id: task.assignee_id,
       type: 'task_assigned',
       task_id: task.id,
       message: `New task assigned to you: "${task.title}"`,
     }])
+
     sendTaskAssignedEmail({
-      headId: task.assignee_id,
+      recipientId: task.assignee_id,
       taskTitle: task.title,
       dueDate: task.due_date,
       priority: task.priority,
       taskId: task.id,
     }).catch(console.error)
+
+    // Also notify other active members and heads in this pillar
+    if (task.pillar_id) {
+      const { data: pillarTeam } = await supabase
+        .from('users')
+        .select('id, role')
+        .eq('pillar_id', task.pillar_id)
+        .in('role', ['head', 'member'])
+        .neq('id', task.assignee_id)
+        .eq('active', true)
+
+      if (pillarTeam && pillarTeam.length > 0) {
+        await createNotifications(
+          pillarTeam.map((u) => ({
+            user_id: u.id,
+            type: 'task_assigned' as const,
+            task_id: task.id,
+            message: `New task added to your pillar: "${task.title}"`,
+          }))
+        )
+        for (const u of pillarTeam) {
+          sendTaskAssignedEmail({
+            recipientId: u.id,
+            taskTitle: task.title,
+            dueDate: task.due_date,
+            priority: task.priority,
+            taskId: task.id,
+          }).catch(console.error)
+        }
+      }
+    }
   } else if (task.pillar_id) {
-    const supabase = await createClient()
-    const { data: pillarHeads } = await supabase
+    // Unassigned task: notify ALL active heads AND members of this pillar
+    const { data: pillarTeam } = await supabase
       .from('users')
-      .select('id')
+      .select('id, role')
       .eq('pillar_id', task.pillar_id)
-      .eq('role', 'head')
+      .in('role', ['head', 'member'])
       .eq('active', true)
 
-    if (pillarHeads && pillarHeads.length > 0) {
+    if (pillarTeam && pillarTeam.length > 0) {
       await createNotifications(
-        pillarHeads.map((h) => ({
-          user_id: h.id,
+        pillarTeam.map((u) => ({
+          user_id: u.id,
           type: 'task_assigned' as const,
           task_id: task.id,
-          message: `New task assigned to your pillar: "${task.title}"`,
+          message: `New task added to your pillar: "${task.title}"`,
         }))
       )
-      for (const h of pillarHeads) {
+      for (const u of pillarTeam) {
         sendTaskAssignedEmail({
-          headId: h.id,
+          recipientId: u.id,
           taskTitle: task.title,
           dueDate: task.due_date,
           priority: task.priority,
@@ -122,6 +157,7 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
   revalidatePath('/command')
   revalidatePath('/command/tasks')
   revalidatePath('/head')
+  revalidatePath('/member')
   return result
 }
 

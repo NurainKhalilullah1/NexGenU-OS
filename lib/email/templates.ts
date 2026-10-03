@@ -91,20 +91,24 @@ function renderBaseEmail({
 }
 
 export function taskAssignedEmail(params: {
-  headName: string
+  headName?: string
+  recipientName?: string
   taskTitle: string
   dueDate: string | null
   priority: string
   taskId: string
+  role?: string
 }): { subject: string; html: string } {
-  const taskUrl = `${APP_URL}/head/tasks/${params.taskId}`
+  const name = params.recipientName || params.headName || 'Team Member'
+  const isMember = params.role === 'member'
+  const taskUrl = isMember ? `${APP_URL}/member` : `${APP_URL}/head/tasks/${params.taskId}`
   return {
     subject: `New Task Assigned: ${params.taskTitle}`,
     html: renderBaseEmail({
       title: 'New Task Assigned',
       contentHtml: `
-        <p>Hello ${params.headName},</p>
-        <p>A new task has been assigned to your pillar:</p>
+        <p>Hello ${name},</p>
+        <p>A new task has been added to your workspace:</p>
         <div style="background-color: #1B2E34; padding: 16px; border-radius: 8px; border-left: 4px solid #B9FBC2; margin: 16px 0;">
           <strong style="color: #FFFFFF; font-size: 15px;">${params.taskTitle}</strong><br/>
           <span style="color: rgba(255,255,255,0.7); font-size: 13px;">Priority: <strong style="text-transform: capitalize; color: #B9FBC2;">${params.priority}</strong></span><br/>
