@@ -42,7 +42,7 @@ export function NotificationBell({
           setNotifications((prev) => [newNotif, ...prev].slice(0, 50))
           setUnreadCount((c) => c + 1)
           toast.info(newNotif.message, {
-            title: newNotif.title || 'Notification',
+            title: 'Notification',
           })
         }
       )
