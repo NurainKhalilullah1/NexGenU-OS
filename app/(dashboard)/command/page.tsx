@@ -63,7 +63,7 @@ export default async function CommandPage({
   return (
     <div className="page-content">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>Command Center</h1>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
@@ -75,6 +75,7 @@ export default async function CommandPage({
 
       {/* Summary Cards */}
       <div
+        className="summary-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',

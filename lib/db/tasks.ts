@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { Task, ActionResult, PillarWorkload, TaskPriority } from '@/types/database'
 import type { CreateTaskInput } from '@/lib/validations/task'
 import { isOverdue } from '@/lib/utils'
@@ -115,7 +115,9 @@ export async function createTask(
   input: CreateTaskInput,
   createdById: string
 ): Promise<ActionResult<Task>> {
-  const supabase = await createClient()
+  // Use service client so the INSERT bypasses RLS.
+  // Auth check (admin only) is enforced in the Server Action before calling this.
+  const supabase = createServiceClient()
 
   const { data, error } = await supabase
     .from('tasks')

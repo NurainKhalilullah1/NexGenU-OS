@@ -77,6 +77,7 @@ export function CreateTaskModal({ open, onClose }: CreateTaskModalProps) {
       aria-labelledby="create-task-modal-title"
     >
       <div
+        className="modal-content"
         style={{
           background: 'var(--surface-2)',
           border: '1px solid var(--border-default)',
