@@ -374,7 +374,7 @@ export async function returnSubmissionAction(
   }
 
   const supabase = await createClient()
-  const { data: taskBefore } = await supabase.from('tasks').select('status').eq('id', taskId).single()
+  const { data: taskBefore } = await supabase.from('tasks').select('status, title').eq('id', taskId).single()
 
   const subResult = await reviewSubmission(submissionId, 'returned', feedback, admin.id)
   if (subResult.error) return { data: null, error: subResult.error }
