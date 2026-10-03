@@ -4,7 +4,11 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { CreateTaskModal } from './CreateTaskModal'
 
-export function CreateTaskButton() {
+interface Props {
+  defaultPillarId?: string
+}
+
+export function CreateTaskButton({ defaultPillarId }: Props = {}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -18,7 +22,7 @@ export function CreateTaskButton() {
         <Plus size={16} />
         New Task
       </button>
-      <CreateTaskModal open={open} onClose={() => setOpen(false)} />
+      <CreateTaskModal open={open} onClose={() => setOpen(false)} defaultPillarId={defaultPillarId} />
     </>
   )
 }

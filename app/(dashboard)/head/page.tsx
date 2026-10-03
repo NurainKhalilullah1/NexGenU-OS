@@ -6,6 +6,7 @@ import { getTasksForHead, getHeadDashboardStats } from '@/lib/db/tasks'
 import { SummaryCard } from '@/components/dashboard/shared/SummaryCard'
 import { HeadFocusSection } from '@/components/dashboard/head/HeadFocusSection'
 import { HeadTaskTabs } from '@/components/dashboard/head/HeadTaskTabs'
+import { CreateTaskButton } from '@/components/dashboard/command/CreateTaskButton'
 import { CheckCircle2, Clock, Calendar, RotateCcw, ClipboardList } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -64,30 +65,33 @@ export default async function HeadDashboardPage() {
   return (
     <div className="page-content">
       {/* Header */}
-      <div style={{ marginBottom: '28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <span
-            style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              background: 'rgba(207, 193, 252, 0.15)',
-              color: 'var(--color-lavender)',
-              padding: '2px 8px',
-              borderRadius: '4px',
-            }}
-          >
-            {profile.pillar?.nickname ?? 'Pillar Head'}
-          </span>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Workspace</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                background: 'rgba(207, 193, 252, 0.15)',
+                color: 'var(--color-lavender)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+              }}
+            >
+              {profile.pillar?.nickname ?? 'Pillar Head'}
+            </span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Workspace</span>
+          </div>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+            {profile.pillar?.name ?? 'My Pillar Dashboard'}
+          </h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            Welcome back, {profile.full_name}. Here is your team&apos;s active execution pipeline.
+          </p>
         </div>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-          {profile.pillar?.name ?? 'My Pillar Dashboard'}
-        </h1>
-        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-          Welcome back, {profile.full_name}. Here is your team&apos;s active execution pipeline.
-        </p>
+        <CreateTaskButton defaultPillarId={profile.pillar_id} />
       </div>
 
       {/* Summary Cards Row */}

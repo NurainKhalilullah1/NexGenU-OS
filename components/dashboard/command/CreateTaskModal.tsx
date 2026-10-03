@@ -9,23 +9,25 @@ import type { Pillar, User } from '@/types/database'
 interface CreateTaskModalProps {
   open: boolean
   onClose: () => void
+  defaultPillarId?: string
 }
 
-export function CreateTaskModal({ open, onClose }: CreateTaskModalProps) {
+export function CreateTaskModal({ open, onClose, defaultPillarId }: CreateTaskModalProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pillars, setPillars] = useState<Pillar[]>([])
   const [heads, setHeads] = useState<User[]>([])
-  const [selectedPillar, setSelectedPillar] = useState('')
+  const [selectedPillar, setSelectedPillar] = useState(defaultPillarId || '')
   const [recurrence, setRecurrence] = useState('none')
 
   useEffect(() => {
     if (!open) return
+    if (defaultPillarId) setSelectedPillar(defaultPillarId)
     // Fetch pillars and heads from API
     fetch('/api/pillars').then((r) => r.json()).then((d) => setPillars(d.pillars ?? []))
     fetch('/api/heads').then((r) => r.json()).then((d) => setHeads(d.heads ?? []))
-  }, [open])
+  }, [open, defaultPillarId])
 
   const filteredHeads = selectedPillar
     ? heads.filter((h) => h.pillar_id === selectedPillar)

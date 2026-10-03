@@ -115,9 +115,7 @@ export async function createTask(
   input: CreateTaskInput,
   createdById: string
 ): Promise<ActionResult<Task>> {
-  // Use service client so the INSERT bypasses RLS.
-  // Auth check (admin only) is enforced in the Server Action before calling this.
-  const supabase = createServiceClient()
+  const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY ? createServiceClient() : await createClient()
 
   const { data, error } = await supabase
     .from('tasks')
@@ -129,7 +127,10 @@ export async function createTask(
     .select()
     .single()
 
-  if (error) return { data: null, error: error.message }
+  if (error) {
+    console.error('[createTask DB Error]:', error)
+    return { data: null, error: error.message }
+  }
   return { data: data as Task, error: null }
 }
 

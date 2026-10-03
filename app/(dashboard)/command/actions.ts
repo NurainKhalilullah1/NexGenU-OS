@@ -22,7 +22,7 @@ import {
 import type { ActionResult, Task, TaskRecurrence, TaskPriority } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
-async function getAdminUser() {
+async function getAuthorizedTaskCreator() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -33,23 +33,26 @@ async function getAdminUser() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') return null
+  if (!profile || (profile.role !== 'admin' && profile.role !== 'head')) return null
   return profile
 }
 
 export async function createTaskAction(formData: FormData): Promise<ActionResult<Task>> {
-  const admin = await getAdminUser()
-  if (!admin) return { data: null, error: 'Unauthorized' }
+  const creator = await getAuthorizedTaskCreator()
+  if (!creator) return { data: null, error: 'Unauthorized: Admin or Pillar Head access required.' }
 
   const recurrenceValue = (formData.get('recurrence') as string) || 'none'
+  const requestedPillarId = (formData.get('pillar_id') as string)?.trim()
+  const pillarId = creator.role === 'head' ? (creator.pillar_id || requestedPillarId) : requestedPillarId
+
   const raw = {
-    title: formData.get('title') as string,
-    description: formData.get('description') as string || '',
-    pillar_id: formData.get('pillar_id') as string,
-    assignee_id: (formData.get('assignee_id') as string) || null,
-    priority: formData.get('priority') as string || 'medium',
-    due_date: (formData.get('due_date') as string) || null,
-    kpi_ref: (formData.get('kpi_ref') as string) || null,
+    title: (formData.get('title') as string)?.trim() || '',
+    description: (formData.get('description') as string)?.trim() || '',
+    pillar_id: pillarId || '',
+    assignee_id: (formData.get('assignee_id') as string)?.trim() || null,
+    priority: (formData.get('priority') as string) || 'medium',
+    due_date: (formData.get('due_date') as string)?.trim() || null,
+    kpi_ref: (formData.get('kpi_ref') as string)?.trim() || null,
     recurrence: recurrenceValue as TaskRecurrence,
   }
 
@@ -59,14 +62,14 @@ export async function createTaskAction(formData: FormData): Promise<ActionResult
     return { data: null, error: firstError.message }
   }
 
-  const result = await createTask(parsed.data, admin.id)
+  const result = await createTask(parsed.data, creator.id)
   if (result.error) return result
 
   const task = result.data!
 
   // Audit log
   await addAuditLog({
-    actor_id: admin.id,
+    actor_id: creator.id,
     action: 'task.created',
     entity: 'tasks',
     entity_id: task.id,
