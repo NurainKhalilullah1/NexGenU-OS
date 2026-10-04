@@ -27,13 +27,6 @@ export function Sidebar({ user }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
   const isAdmin = user.role === 'admin'
-
-  const navItems = NAV_ITEMS.filter(
-    (item) => !item.adminOnly || (item.adminOnly && isAdmin)
-  ).filter(
-    (item) => !(!item.adminOnly && isAdmin)
-  )
-
   const isHead = user.role === 'head'
   const isMember = user.role === 'member'
 
