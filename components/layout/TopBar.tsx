@@ -1,5 +1,5 @@
 // components/layout/TopBar.tsx
-import { Search, LogOut, User as UserIcon } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { getNotificationsForUser, getUnreadCount } from '@/lib/db/notifications'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import type { User } from '@/types/database'
@@ -73,28 +73,42 @@ export async function TopBar({ user, pageTitle }: TopBarProps) {
         initialUnreadCount={unreadCount}
       />
 
-      {/* User avatar + menu */}
+      {/* User avatar + name + role */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <div
           style={{
             width: 32,
             height: 32,
             borderRadius: '8px',
-            background: user.role === 'admin' ? 'rgba(185,251,194,0.2)' : 'rgba(207,193,252,0.2)',
+            background: user.role === 'admin' ? 'rgba(185,251,194,0.2)' : user.role === 'head' ? 'rgba(207,193,252,0.2)' : 'rgba(255,255,255,0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '12px',
             fontWeight: 700,
-            color: user.role === 'admin' ? 'var(--color-accent)' : 'var(--color-lavender)',
+            color: user.role === 'admin' ? 'var(--color-accent)' : user.role === 'head' ? 'var(--color-lavender)' : 'var(--text-primary)',
             flexShrink: 0,
           }}
           title={user.full_name}
         >
           {getInitials(user.full_name || user.email)}
         </div>
-        <div style={{ display: 'none' }}>
-          <span style={{ fontSize: '13px', fontWeight: 500 }}>{user.full_name || user.email}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+            {user.full_name || user.email}
+          </span>
+          <span
+            style={{
+              fontSize: '10px',
+              fontWeight: 600,
+              color: user.role === 'admin' ? 'var(--color-accent)' : user.role === 'head' ? 'var(--color-lavender)' : 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              lineHeight: 1,
+            }}
+          >
+            {user.role}
+          </span>
         </div>
         <SignOutButton />
       </div>

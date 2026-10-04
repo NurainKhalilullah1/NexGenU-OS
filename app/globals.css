@@ -121,6 +121,24 @@
   --ease-out-fast: 150ms ease-out;
   --ease-standard: 200ms ease;
   --ease-panel: 300ms ease;
+
+  /* Border radius tokens */
+  --radius-xs:  4px;
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  14px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
 }
 
 /* ===== Global Reset & Base ===== */
@@ -216,6 +234,24 @@ a:hover { text-decoration: underline; }
 @keyframes pulse {
   0%, 100% { opacity: 0.6; }
   50%       { opacity: 0.3; }
+}
+
+/* Bulk action bar entrance */
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Toast entrance (moved from inline <style> in ToastContainer) */
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Notification panel entrance */
+@keyframes notifPanel {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .animate-fade-in   { animation: fadeIn 200ms ease forwards; }
@@ -423,12 +459,13 @@ select.input option { background: var(--surface-2); }
   border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 20px;
+  transition: all var(--ease-standard);
 }
 
 .card:hover {
   background: var(--surface-2);
   border-color: var(--border-subtle);
-  transition: all var(--ease-standard);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* ===== Divider ===== */
@@ -525,3 +562,49 @@ select.input option { background: var(--surface-2); }
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ===== Skeleton shimmer loading ===== */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-text {
+  height: 12px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.skeleton-text-sm {
+  height: 10px;
+  width: 60%;
+}
+
+/* ===== Mobile bulk action bar — clear mobile nav ===== */
+@media (max-width: 768px) {
+  #bulk-action-bar {
+    bottom: 80px !important;
+  }
+}
+
+/* ===== Glassmorphism panel ===== */
+.glass-panel {
+  background: rgba(42, 73, 84, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+

@@ -172,6 +172,9 @@ export function AllTasksTable({ tasks, showPillar = true }: AllTasksTableProps) 
                   borderBottom: '1px solid var(--border-default)',
                   background: 'var(--surface-2)',
                   color: 'var(--text-muted)',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 1,
                 }}
               >
                 <th style={{ width: '40px', padding: '12px', textAlign: 'center' }}>

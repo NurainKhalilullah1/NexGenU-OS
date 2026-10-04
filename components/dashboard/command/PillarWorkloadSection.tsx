@@ -54,7 +54,7 @@ export function PillarWorkloadSection({ workloads }: PillarWorkloadSectionProps)
 
   const getCapacityColor = (percentage: number) => {
     if (percentage <= 50) return 'var(--color-accent)'
-    if (percentage <= 75) 'var(--color-lavender)'
+    if (percentage <= 75) return 'var(--color-lavender)'
     return 'var(--color-orange)'
   }
 

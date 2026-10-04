@@ -137,7 +137,7 @@ export function NotificationBell({
             top: '100%',
             right: 0,
             marginTop: 8,
-            width: 360,
+            width: 'min(360px, calc(100vw - 24px))',
             maxHeight: 480,
             background: 'var(--surface-2)',
             border: '1px solid var(--border-default)',
@@ -145,7 +145,7 @@ export function NotificationBell({
             zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
-            animation: 'fadeIn 150ms ease',
+            animation: 'notifPanel 180ms cubic-bezier(0.16, 1, 0.3, 1)',
             boxShadow: '0 16px 48px rgba(0,0,0,0.4)',
           }}
           role="dialog"

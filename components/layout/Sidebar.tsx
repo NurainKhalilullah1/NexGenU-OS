@@ -18,19 +18,6 @@ import {
 } from 'lucide-react'
 import type { User } from '@/types/database'
 
-interface NavItem {
-  href: string
-  label: string
-  icon: React.ComponentType<{ size?: number; color?: string }>
-  adminOnly?: boolean
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { href: '/command', label: 'Command', icon: LayoutDashboard, adminOnly: true },
-  { href: '/head', label: 'My Dashboard', icon: LayoutDashboard, adminOnly: false },
-  { href: '/command/tasks', label: 'All Tasks', icon: CheckSquare, adminOnly: true },
-]
-
 interface SidebarProps {
   user: User
   unreadCount?: number
@@ -139,18 +126,21 @@ export function Sidebar({ user }: SidebarProps) {
                 padding: collapsed ? '10px 12px' : '10px 12px',
                 borderRadius: '8px',
                 textDecoration: 'none',
-                background: active ? 'rgba(185,251,194,0.12)' : 'transparent',
+                background: active ? 'rgba(185,251,194,0.10)' : 'transparent',
                 color: active ? 'var(--color-accent)' : 'var(--text-secondary)',
                 transition: 'all 150ms ease-out',
                 overflow: 'hidden',
                 whiteSpace: 'nowrap',
+                borderLeft: active ? '3px solid var(--color-accent)' : '3px solid transparent',
+                paddingLeft: active ? '9px' : '12px',
+                fontWeight: active ? 500 : 400,
               }}
-              className="hover:bg-[var(--color-overlay)] hover:text-[var(--text-primary)]"
+              className="hover:bg-[rgba(185,251,194,0.06)] hover:text-[var(--text-primary)]"
               title={collapsed ? label : undefined}
             >
               <Icon size={18} color={active ? '#B9FBC2' : undefined} />
               {!collapsed && (
-                <span style={{ fontSize: '14px', fontWeight: active ? 500 : 400 }}>{label}</span>
+                <span style={{ fontSize: '14px' }}>{label}</span>
               )}
             </Link>
           )
@@ -190,10 +180,12 @@ export function Sidebar({ user }: SidebarProps) {
           style={{
             padding: '12px 16px',
             borderTop: '1px solid var(--border-default)',
-            fontSize: '11px',
-            color: 'var(--text-muted)',
           }}
         >
+          {/* User name */}
+          <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {user.full_name || user.email}
+          </div>
           <span
             style={{
               background: isAdmin
@@ -221,6 +213,29 @@ export function Sidebar({ user }: SidebarProps) {
           >
             {isAdmin ? 'Admin' : isHead ? 'Head' : 'Member'}
           </span>
+        </div>
+      )}
+      {collapsed && (
+        <div style={{ padding: '12px 0', display: 'flex', justifyContent: 'center' }}>
+          <div
+            title={`${user.full_name || user.email} · ${isAdmin ? 'Admin' : isHead ? 'Head' : 'Member'}`}
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: '6px',
+              background: isAdmin ? 'rgba(185,251,194,0.15)' : isHead ? 'rgba(207,193,252,0.15)' : 'rgba(255,255,255,0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '11px',
+              fontWeight: 700,
+              color: isAdmin ? 'var(--color-accent)' : isHead ? 'var(--color-lavender)' : 'var(--text-primary)',
+              border: `1px solid ${isAdmin ? 'rgba(185,251,194,0.3)' : isHead ? 'rgba(207,193,252,0.3)' : 'var(--border-subtle)'}`,
+              cursor: 'default',
+            }}
+          >
+            {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
+          </div>
         </div>
       )}
     </aside>

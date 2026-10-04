@@ -49,6 +49,7 @@ export function SummaryCard({
       style={{
         background: 'var(--surface-1)',
         border: '1px solid var(--border-default)',
+        borderTop: `2px solid ${colors.iconColor}`,
         borderRadius: '12px',
         padding: '20px',
         display: 'flex',
@@ -56,7 +57,7 @@ export function SummaryCard({
         gap: '12px',
         transition: 'all 200ms ease',
       }}
-      className="hover:border-[var(--border-subtle)] hover:bg-[var(--surface-2)]"
+      className="hover:border-t-[var(--border-subtle)] hover:bg-[var(--surface-2)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span
