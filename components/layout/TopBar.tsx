@@ -1,4 +1,6 @@
 // components/layout/TopBar.tsx
+import Image from 'next/image'
+import Link from 'next/link'
 import { LogOut } from 'lucide-react'
 import { getNotificationsForUser, getUnreadCount } from '@/lib/db/notifications'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
@@ -21,10 +23,17 @@ async function SignOutButton() {
   }
 
   return (
-    <form action={signOut}>
-      <button type="submit" className="btn btn-ghost btn-sm" style={{ gap: 6 }} id="topbar-signout-btn">
+    <form action={signOut} style={{ display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        type="submit"
+        className="btn btn-ghost btn-sm"
+        style={{ gap: 6, padding: '6px 10px' }}
+        id="topbar-signout-btn"
+        title="Sign out"
+        aria-label="Sign out"
+      >
         <LogOut size={14} />
-        Sign out
+        <span className="hidden sm:inline">Sign out</span>
       </button>
     </form>
   )
@@ -36,6 +45,8 @@ export async function TopBar({ user, pageTitle }: TopBarProps) {
     getUnreadCount(user.id),
   ])
 
+  const homeHref = user.role === 'admin' ? '/command' : user.role === 'head' ? '/head' : '/member'
+
   return (
     <header
       style={{
@@ -44,14 +55,61 @@ export async function TopBar({ user, pageTitle }: TopBarProps) {
         borderBottom: '1px solid var(--border-default)',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 20px',
+        padding: '0 16px',
         gap: '12px',
         flexShrink: 0,
       }}
     >
+      {/* Mobile NexGenU Brand Logo — visible on mobile when sidebar is hidden */}
+      <Link
+        href={homeHref}
+        className="flex md:hidden items-center gap-2"
+        style={{
+          textDecoration: 'none',
+          flexShrink: 0,
+        }}
+        aria-label="NexGenU Home"
+        id="topbar-mobile-logo"
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: '8px',
+            background: 'var(--color-surface)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            border: '1px solid var(--border-subtle)',
+          }}
+        >
+          <Image
+            src="/images/nexgenu-logo.png"
+            alt="NexGenU"
+            width={22}
+            height={22}
+            style={{ objectFit: 'contain' }}
+            priority
+          />
+        </div>
+        <span
+          style={{
+            fontSize: '15px',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.01em',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          NexGenU
+        </span>
+      </Link>
+
       {/* Page title */}
       {pageTitle && (
         <h1
+          className="hidden md:block"
           style={{
             fontSize: '16px',
             fontWeight: 600,
@@ -89,11 +147,11 @@ export async function TopBar({ user, pageTitle }: TopBarProps) {
             color: user.role === 'admin' ? 'var(--color-accent)' : user.role === 'head' ? 'var(--color-lavender)' : 'var(--text-primary)',
             flexShrink: 0,
           }}
-          title={user.full_name}
+          title={user.full_name || user.email}
         >
           {getInitials(user.full_name || user.email)}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+        <div className="hidden sm:flex" style={{ flexDirection: 'column', gap: '1px' }}>
           <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.2 }}>
             {user.full_name || user.email}
           </span>

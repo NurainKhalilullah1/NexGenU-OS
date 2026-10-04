@@ -76,32 +76,44 @@ export function Sidebar({ user }: SidebarProps) {
           overflow: 'hidden',
         }}
       >
-        <div
+        <Link
+          href={isAdmin ? '/command' : user.role === 'head' ? '/head' : '/member'}
           style={{
-            width: 34,
-            height: 34,
-            borderRadius: '8px',
-            background: 'var(--color-surface)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            border: '1px solid var(--border-subtle)',
+            gap: '10px',
+            textDecoration: 'none',
           }}
+          aria-label="NexGenU Home"
         >
-          <Image
-            src="/images/nexgenu-logo.png"
-            alt="NexGenU"
-            width={24}
-            height={24}
-            style={{ objectFit: 'contain' }}
-          />
-        </div>
-        {!collapsed && (
-          <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
-            NexGenU
-          </span>
-        )}
+          <div
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: '8px',
+              background: 'var(--color-surface)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              border: '1px solid var(--border-subtle)',
+            }}
+          >
+            <Image
+              src="/images/nexgenu-logo.png"
+              alt="NexGenU"
+              width={24}
+              height={24}
+              style={{ objectFit: 'contain' }}
+              priority
+            />
+          </div>
+          {!collapsed && (
+            <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+              NexGenU
+            </span>
+          )}
+        </Link>
       </div>
 
       {/* Nav */}
