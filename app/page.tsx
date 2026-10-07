@@ -16,5 +16,6 @@ export default async function RootPage() {
     .single()
 
   if (profile?.role === 'admin') redirect('/command')
+  if (profile?.role === 'member') redirect('/member')
   redirect('/head')
 }

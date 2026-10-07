@@ -49,7 +49,7 @@ export async function getAssignableUsers(): Promise<User[]> {
   const { data, error } = await supabase
     .from('users')
     .select('*, pillar:pillars(id, name, nickname)')
-    .in('role', ['head', 'member'])
+    .in('role', ['admin', 'head', 'member'])
     .eq('active', true)
     .order('role', { ascending: true })
     .order('full_name')
