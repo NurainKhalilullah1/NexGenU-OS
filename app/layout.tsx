@@ -17,8 +17,11 @@ export const metadata: Metadata = {
   },
   description: 'Internal task-assignment and execution-tracking system for NexGenU leadership and pillar heads',
   icons: {
-    icon: '/images/nexgenu-logo.png',
-    apple: '/images/nexgenu-logo.png',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: '/apple-icon.png',
   },
 }
 
